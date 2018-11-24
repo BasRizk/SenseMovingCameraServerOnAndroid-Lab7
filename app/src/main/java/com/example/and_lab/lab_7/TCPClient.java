@@ -9,7 +9,7 @@ class TCPClient {
         this.port_number = port_number;
     }
 
-    public void Start() throws IOException {
+    public void start() throws IOException {
         String sentence;
         String modifiedSentence;
         BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
