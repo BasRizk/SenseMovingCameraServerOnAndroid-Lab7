@@ -34,6 +34,8 @@ public class AccSensorMotion implements SensorEventListener {
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             vibrateThreshold = accelerometer.getMaximumRange() / 2;
+            Toast.makeText(context, "Sensor is in-hand ;)", Toast.LENGTH_LONG).show();
+
         } else {
             Toast.makeText(context, "Device does not have an accelerometer sensor.", Toast.LENGTH_LONG).show();
         }
@@ -43,9 +45,24 @@ public class AccSensorMotion implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        deltaX = Math.abs(lastX - event.values[0]);
-        deltaY = Math.abs(lastY - event.values[0]);
-        deltaZ = Math.abs(lastZ - event.values[0]);
+
+        final float alpha = 0.8f;
+
+        float[] gravity = new float[3];
+        // Isolate the force of gravity with the low-pass filter.
+        gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
+        gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
+        gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+
+        float[] linear_acceleration = new float[3];
+        // Remove the gravity contribution with the high-pass filter.
+        linear_acceleration[0] = event.values[0] - gravity[0];
+        linear_acceleration[1] = event.values[1] - gravity[1];
+        linear_acceleration[2] = event.values[2] - gravity[2];
+
+        deltaX = Math.abs(lastX - linear_acceleration[0]);
+        deltaY = Math.abs(lastY - linear_acceleration[1]);
+        deltaZ = Math.abs(lastZ - linear_acceleration[2]);
 
         int noiseLimit = 2;
         if(deltaX < noiseLimit)
