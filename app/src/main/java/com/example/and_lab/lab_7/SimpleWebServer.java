@@ -1,3 +1,5 @@
+package com.example.and_lab.lab_7;
+
 import android.content.res.AssetManager;
 import android.text.TextUtils;
 import android.util.Log;
