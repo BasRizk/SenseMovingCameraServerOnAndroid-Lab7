@@ -45,6 +45,9 @@ public class AccSensorMotion implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        //Toast.makeText(m_Context, deltaX + ", " + deltaY + ", " + deltaZ, Toast.LENGTH_SHORT).show();
+
+
 
         final float alpha = 0.8f;
 
@@ -64,6 +67,7 @@ public class AccSensorMotion implements SensorEventListener {
         deltaY = Math.abs(lastY - linear_acceleration[1]);
         deltaZ = Math.abs(lastZ - linear_acceleration[2]);
 
+        /*
         int noiseLimit = 2;
         if(deltaX < noiseLimit)
             deltaX = 0;
@@ -72,6 +76,7 @@ public class AccSensorMotion implements SensorEventListener {
         // TODO maybe it have been missing from the src code online
         if(deltaZ < noiseLimit)
             deltaZ = 0;
+        */
 
         if( (deltaZ > vibrateThreshold) || (deltaY > vibrateThreshold) || (deltaZ > vibrateThreshold)) {
             vibrator.vibrate(50);
