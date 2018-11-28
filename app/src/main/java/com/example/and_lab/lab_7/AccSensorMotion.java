@@ -47,8 +47,6 @@ public class AccSensorMotion implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         //Toast.makeText(m_Context, deltaX + ", " + deltaY + ", " + deltaZ, Toast.LENGTH_SHORT).show();
 
-
-
         final float alpha = 0.8f;
 
         float[] gravity = new float[3];

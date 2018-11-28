@@ -10,6 +10,7 @@ public class MainActivity extends AppCompatActivity {
     private AccSensorMotion accSensorMotion;
     private SimpleWebServer webServer;
     private TCPClient emulatorClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,14 +18,11 @@ public class MainActivity extends AppCompatActivity {
 
         accSensorMotion = new AccSensorMotion(this);
 
-        webServer = new SimpleWebServer(8000,getAssets());
+        webServer = new SimpleWebServer(8000,getAssets(), this);
         webServer.start();
-        emulatorClient = new TCPClient(7000);
-        try {
-            emulatorClient.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        emulatorClient = new TCPClient(8080);
+        emulatorClient.start();
+
     }
 
     @Override
