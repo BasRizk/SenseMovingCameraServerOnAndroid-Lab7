@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -52,6 +53,10 @@ public class SimpleWebServer implements Runnable{
     private Context context;
     private String mCurrentPhotoPath;
     private boolean isCameraUsed = false;
+    private boolean isCameraUsed2 = false;
+    private boolean isCameraUsed3 = false;
+    static final int REQUEST_TAKE_PHOTO = 1;
+
 
     public SimpleWebServer(int port, AssetManager assets, Context context) {
         mPort = port;
@@ -90,10 +95,36 @@ public class SimpleWebServer implements Runnable{
     public void run() {
         try {
             mServerSocket = new ServerSocket(mPort);
+            int i = 0;
             while (mIsRunning) {
-                Socket socket = mServerSocket.accept();
-                handle(socket);
-                socket.close();
+                if(!isCameraUsed && !isCameraUsed2 && !isCameraUsed3) {
+                    if(!isCameraUsebyApp()) {
+                        Socket socket = mServerSocket.accept();
+                        i = 0;
+                        while (i < 100000000) {
+                            i++;
+                        }
+                        if (!isCameraUsed) {
+                            isCameraUsed = true;
+                            if (!isCameraUsed2) {
+                                if (!isCameraUsed3) {
+                                    isCameraUsed3 = true;
+                                    isCameraUsed2 = !isCameraUsed2;
+                                }
+                                if (isCameraUsed2)
+                                    handle(socket);
+                            }
+                        }
+                        socket.close();
+                    }
+                    isCameraUsed = false;
+                    isCameraUsed2 = false;
+                    isCameraUsed3 = false;
+                    i = 0;
+                    while (i < 100000000) {
+                        i++;
+                    }
+                }
             }
         } catch (SocketException e) {
             // The server was stopped; ignore.
@@ -110,11 +141,9 @@ public class SimpleWebServer implements Runnable{
      */
     private void handle(Socket socket) throws IOException {
 
-        if(socket != null && !isCameraUsed) {
-            isCameraUsed = true;
+        if(socket != null) {
             dispatchTakePictureIntent();
             galleryAddPic();
-//            isCameraUsed = false;
         }
 
 //        BufferedReader reader = null;
@@ -236,11 +265,12 @@ public class SimpleWebServer implements Runnable{
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-//                Uri photoURI = FileProvider.getUriForFile(context,
-//                        "com.example.android.fileprovider",
-//                        photoFile);
-//                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                ((Activity) context).startActivityForResult(takePictureIntent, 1);
+                Uri photoURI = FileProvider.getUriForFile(context,
+                        "com.example.android.fileprovider",
+                        photoFile);
+                Log.i("filePath", "Uri: " + photoURI.toString() + "\n");
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                ((Activity) context).startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
     }
@@ -257,6 +287,7 @@ public class SimpleWebServer implements Runnable{
         );
 
         // Save a file: path for use with ACTION_VIEW intents
+        Log.i("filePath", "image path: " + image.getAbsolutePath() + "\n");
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
@@ -267,5 +298,17 @@ public class SimpleWebServer implements Runnable{
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
         context.sendBroadcast(mediaScanIntent);
+    }
+
+    public boolean isCameraUsebyApp() {
+        Camera camera = null;
+        try {
+            camera = Camera.open();
+        } catch (RuntimeException e) {
+            return true;
+        } finally {
+            if (camera != null) camera.release();
+        }
+        return false;
     }
 }
