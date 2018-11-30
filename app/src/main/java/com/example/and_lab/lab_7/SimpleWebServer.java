@@ -26,6 +26,8 @@ import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static com.example.and_lab.lab_7.MainActivity.galleryAddPic;
+
 public class SimpleWebServer implements Runnable{
     private static final String TAG = "SimpleWebServer";
 
@@ -50,13 +52,23 @@ public class SimpleWebServer implements Runnable{
     private ServerSocket mServerSocket;
 
     private Context context;
-    private String mCurrentPhotoPath;
-    private boolean isCameraUsed = false;
+    private boolean cameraUsed = false;
+    private boolean pictureTaken = false;
 
     public SimpleWebServer(int port, AssetManager assets, Context context) {
         mPort = port;
         mAssets = assets;
         this.context = context;
+    }
+
+    public boolean isCameraUsed(){
+        return cameraUsed;
+    }
+    public boolean isPictureTaken(){
+        return pictureTaken;
+    }
+    public void setPictureTaken(boolean pictureTaken){
+        this.pictureTaken = pictureTaken;
     }
 
     /**
@@ -110,11 +122,12 @@ public class SimpleWebServer implements Runnable{
      */
     private void handle(Socket socket) throws IOException {
 
-        if(socket != null && !isCameraUsed) {
-            isCameraUsed = true;
-            dispatchTakePictureIntent();
-            galleryAddPic();
-//            isCameraUsed = false;
+        if(socket != null && !cameraUsed) {
+            cameraUsed = true;
+            ((MainActivity)context).dispatchTakePictureIntent(context);
+            ((MainActivity)context).galleryAddPic(context);
+            pictureTaken = true;
+//            cameraUsed = false;
         }
 
 //        BufferedReader reader = null;
@@ -223,49 +236,5 @@ public class SimpleWebServer implements Runnable{
         }
     }
 
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(context.getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                Log.d("photo", "Error occurred while creating the File");
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-//                Uri photoURI = FileProvider.getUriForFile(context,
-//                        "com.example.android.fileprovider",
-//                        photoFile);
-//                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                ((Activity) context).startActivityForResult(takePictureIntent, 1);
-            }
-        }
-    }
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
-    private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        context.sendBroadcast(mediaScanIntent);
-    }
 }

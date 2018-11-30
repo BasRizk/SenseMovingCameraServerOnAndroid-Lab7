@@ -7,7 +7,7 @@ import java.net.*;
 class TCPClient implements Runnable {
     private int port_number;
     private boolean isRunning = false;
-
+    private DataOutputStream outToServer;
     public TCPClient(int port_number){
         this.port_number = port_number;
     }
@@ -23,11 +23,14 @@ class TCPClient implements Runnable {
         try {
             Socket clientSocket = null;
             clientSocket = new Socket("10.0.2.2", port_number);
-            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+            outToServer = new DataOutputStream(clientSocket.getOutputStream());
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException e) {
             Log.e("clientSocket", "connection broke");
         }
 
+    }
+    public void sendMessage(String message) throws IOException {
+        outToServer.write(message.getBytes());
     }
 }
