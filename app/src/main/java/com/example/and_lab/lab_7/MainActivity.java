@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     private AccSensorMotion accSensorMotion;
     private SimpleWebServer webServer;
     private TCPClient emulatorClient;
-    public static String mCurrentPhotoPath;
 
 
     @Override
@@ -58,53 +57,6 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         // Pausing the sensor detection by the application
         accSensorMotion.onPauseAccSensorMotion();
-    }
-
-    public static void dispatchTakePictureIntent(Context context) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(context.getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile(context);
-            } catch (IOException ex) {
-                Log.d("photo", "Error occurred while creating the File");
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-//                Uri photoURI = FileProvider.getUriForFile(context,
-//                        "com.example.android.fileprovider",
-//                        photoFile);
-//                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                ((Activity) context).startActivityForResult(takePictureIntent, 1);
-            }
-        }
-    }
-
-
-    public static File createImageFile(Context context) throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
-    public static void galleryAddPic(Context context) {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        context.sendBroadcast(mediaScanIntent);
     }
 
 }

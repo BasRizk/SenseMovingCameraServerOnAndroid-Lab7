@@ -1,32 +1,19 @@
 package com.example.and_lab.lab_7;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.AssetManager;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
-
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import static com.example.and_lab.lab_7.MainActivity.galleryAddPic;
+
 
 public class SimpleWebServer implements Runnable{
     private static final String TAG = "SimpleWebServer";
@@ -52,23 +39,14 @@ public class SimpleWebServer implements Runnable{
     private ServerSocket mServerSocket;
 
     private Context context;
-    private boolean cameraUsed = false;
-    private boolean pictureTaken = false;
+    CameraHandler camHandler;
+
 
     public SimpleWebServer(int port, AssetManager assets, Context context) {
         mPort = port;
         mAssets = assets;
         this.context = context;
-    }
-
-    public boolean isCameraUsed(){
-        return cameraUsed;
-    }
-    public boolean isPictureTaken(){
-        return pictureTaken;
-    }
-    public void setPictureTaken(boolean pictureTaken){
-        this.pictureTaken = pictureTaken;
+        this.camHandler = new CameraHandler(context);
     }
 
     /**
@@ -122,11 +100,11 @@ public class SimpleWebServer implements Runnable{
      */
     private void handle(Socket socket) throws IOException {
 
-        if(socket != null && !cameraUsed) {
-            cameraUsed = true;
-            ((MainActivity)context).dispatchTakePictureIntent(context);
-            ((MainActivity)context).galleryAddPic(context);
-            pictureTaken = true;
+        if(socket != null && !camHandler.isCameraUsed()) {
+            camHandler.cameraUsed = true;
+            camHandler.dispatchTakePictureIntent();
+            camHandler.galleryAddPic();
+            camHandler.pictureTaken = true;
 //            cameraUsed = false;
         }
 
