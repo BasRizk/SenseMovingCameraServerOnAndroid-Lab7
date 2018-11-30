@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 
 import java.io.File;
@@ -39,10 +40,10 @@ public class CameraHandler {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-//                Uri photoURI = FileProvider.getUriForFile(context,
-//                        "com.example.android.fileprovider",
-//                        photoFile);
-//                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                Uri photoURI = FileProvider.getUriForFile(context,
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 ((Activity) context).startActivityForResult(takePictureIntent, 1);
             }
         }
