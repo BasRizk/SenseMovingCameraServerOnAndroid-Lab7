@@ -32,5 +32,6 @@ class TCPClient implements Runnable {
     }
     public void sendMessage(String message) throws IOException {
         outToServer.write(message.getBytes());
+        outToServer.flush();
     }
 }

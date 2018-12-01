@@ -5,7 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,23 +54,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onLean(String msg) {
-        try {
-            emulatorClient.sendMessage(msg + "\n");
-        } catch (IOException e) {
-            e.printStackTrace();
+        Thread httpClient = new Thread(new HttpClient(8080, msg));
+        httpClient.start();
+            //emulatorClient.sendMessage(msg + "\n");
+
         }
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         webServer.camHandler.setPictureTaken(true);
         if(webServer.camHandler.isPictureTaken()){
-            try {
-                emulatorClient.sendMessage("Picture taken!\n");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+               // emulatorClient.sendMessage("Picture taken!\n");
+                Thread httpClient = new Thread(new HttpClient(8080, "Picture taken!"));
+                httpClient.start();
+
             webServer.camHandler.setPictureTaken(false);
         }
     }
