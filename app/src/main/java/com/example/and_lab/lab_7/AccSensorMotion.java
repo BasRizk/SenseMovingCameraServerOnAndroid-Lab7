@@ -65,6 +65,12 @@ public class AccSensorMotion implements SensorEventListener {
         deltaY = Math.abs(lastY - linear_acceleration[1]);
         deltaZ = Math.abs(lastZ - linear_acceleration[2]);
 
+        if(deltaX > 0) {
+            ((MainActivity)m_Context).onLean("Right");
+        } else if(deltaX < 0) {
+            ((MainActivity)m_Context).onLean("Left");
+        }
+
         /*
         int noiseLimit = 2;
         if(deltaX < noiseLimit)
