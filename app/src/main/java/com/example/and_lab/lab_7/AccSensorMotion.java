@@ -6,6 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Vibrator;
+import android.util.Log;
 import android.widget.Toast;
 
 public class AccSensorMotion implements SensorEventListener {
@@ -26,6 +27,8 @@ public class AccSensorMotion implements SensorEventListener {
     private float vibrateThreshold = 0;
     private Vibrator vibrator;
     private Context m_Context;
+    private boolean read = true;
+    private int timer = 0;
 
     protected AccSensorMotion(Context context) {
         m_Context = context;
@@ -61,15 +64,24 @@ public class AccSensorMotion implements SensorEventListener {
         linear_acceleration[1] = event.values[1] - gravity[1];
         linear_acceleration[2] = event.values[2] - gravity[2];
 
-        deltaX = Math.abs(lastX - linear_acceleration[0]);
-        deltaY = Math.abs(lastY - linear_acceleration[1]);
-        deltaZ = Math.abs(lastZ - linear_acceleration[2]);
+        deltaX = lastX - linear_acceleration[0];
+        deltaY = lastY - linear_acceleration[1];
+        deltaZ = lastZ - linear_acceleration[2];
 
         if(deltaX > 0) {
             ((MainActivity)m_Context).onLean("Right");
+            Log.i("ACC", "Lean Right");
         } else if(deltaX < 0) {
             ((MainActivity)m_Context).onLean("Left");
+            Log.i("ACC", "Lean Left");
         }
+
+        //Log.d("ACC", "deltaX = " + deltaX);
+
+
+        lastX = linear_acceleration[0];
+        lastY = linear_acceleration[1];
+        lastZ = linear_acceleration[2];
 
         /*
         int noiseLimit = 2;
@@ -83,7 +95,7 @@ public class AccSensorMotion implements SensorEventListener {
         */
 
         if( (deltaZ > vibrateThreshold) || (deltaY > vibrateThreshold) || (deltaZ > vibrateThreshold)) {
-            vibrator.vibrate(50);
+            //vibrator.vibrate(50);
         }
 
     }
