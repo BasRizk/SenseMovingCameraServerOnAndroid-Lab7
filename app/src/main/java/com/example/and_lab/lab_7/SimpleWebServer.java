@@ -1,31 +1,22 @@
 package com.example.and_lab.lab_7;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.AssetManager;
 import android.hardware.Camera;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
+
 
 public class SimpleWebServer implements Runnable{
     private static final String TAG = "SimpleWebServer";
@@ -51,17 +42,19 @@ public class SimpleWebServer implements Runnable{
     private ServerSocket mServerSocket;
 
     private Context context;
-    private String mCurrentPhotoPath;
+
     private boolean isCameraUsed = false;
     private boolean isCameraUsed2 = false;
     private boolean isCameraUsed3 = false;
-    static final int REQUEST_TAKE_PHOTO = 1;
+
+    CameraHandler camHandler;
 
 
     public SimpleWebServer(int port, AssetManager assets, Context context) {
         mPort = port;
         mAssets = assets;
         this.context = context;
+        this.camHandler = new CameraHandler(context);
     }
 
     /**
@@ -141,9 +134,11 @@ public class SimpleWebServer implements Runnable{
      */
     private void handle(Socket socket) throws IOException {
 
-        if(socket != null) {
-            dispatchTakePictureIntent();
-            galleryAddPic();
+        if(socket != null && !camHandler.isCameraUsed()) {
+            camHandler.cameraUsed = true;
+            camHandler.dispatchTakePictureIntent();
+            camHandler.galleryAddPic();
+            camHandler.pictureTaken = true;
         }
 
 //        BufferedReader reader = null;
@@ -250,54 +245,6 @@ public class SimpleWebServer implements Runnable{
         } else {
             return "application/octet-stream";
         }
-    }
-
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(context.getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                Log.d("photo", "Error occurred while creating the File");
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(context,
-                        "com.example.android.fileprovider",
-                        photoFile);
-                Log.i("filePath", "Uri: " + photoURI.toString() + "\n");
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                ((Activity) context).startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
-        }
-    }
-
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        Log.i("filePath", "image path: " + image.getAbsolutePath() + "\n");
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
-    private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        context.sendBroadcast(mediaScanIntent);
     }
 
     public boolean isCameraUsebyApp() {
