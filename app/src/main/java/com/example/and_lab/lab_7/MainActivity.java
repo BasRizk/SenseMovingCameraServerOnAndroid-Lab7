@@ -47,4 +47,11 @@ public class MainActivity extends AppCompatActivity {
         accSensorMotion.onPauseAccSensorMotion();
     }
 
+    public void onLean(String msg) {
+        try {
+            emulatorClient.sendMessage(msg + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -138,7 +138,9 @@ public class SimpleWebServer implements Runnable{
             camHandler.cameraUsed = true;
             camHandler.dispatchTakePictureIntent();
             camHandler.galleryAddPic();
-            camHandler.pictureTaken = true;
+
+            camHandler.setPictureTaken(true);
+//            cameraUsed = false;
         }
 
 //        BufferedReader reader = null;
