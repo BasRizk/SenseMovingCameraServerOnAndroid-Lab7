@@ -42,9 +42,7 @@ public class CameraHandler {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(context,
-                        "com.example.android.fileprovider",
-                        photoFile);
+                Uri photoURI = Uri.fromFile(photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 ((Activity) context).startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
