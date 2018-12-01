@@ -62,6 +62,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        
+        webServer.camHandler.setPictureTaken(true);
+        if(webServer.camHandler.isPictureTaken()){
+            try {
+                emulatorClient.sendMessage("Picture taken!\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            webServer.camHandler.setPictureTaken(false);
+        }
     }
 }
