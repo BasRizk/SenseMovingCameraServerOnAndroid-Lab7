@@ -16,8 +16,6 @@ import java.net.URL;
 public class HttpClient implements Runnable {
 
     private int portNumber;
-    private boolean isRunning = false;
-    private DataOutputStream outToServer;
     private URL url;
     private String msg;
 
@@ -26,9 +24,8 @@ public class HttpClient implements Runnable {
         this.portNumber = portNumber;
         this.msg = msg;
         try {
-            url = new URL("http://10.0.2.2:" + portNumber + "/" + msg + "/");
-            isRunning = true;
-            Log.d("HTTP","Connection should intialized");
+            url = new URL("http://10.0.2.2:" + this.portNumber + "/" + msg + "/");
+            Log.d("HTTP","Connection should initialized");
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -38,33 +35,26 @@ public class HttpClient implements Runnable {
 
     @Override
     public void run() {
-        HttpURLConnection urlConnection = null;
+        HttpURLConnection urlConnection;
         try {
             urlConnection = (HttpURLConnection) url.openConnection();
-            Log.d("HTTP","Connection should Opened");
 
-            try {
-                urlConnection.setDoOutput(true);
-                urlConnection.setChunkedStreamingMode(0);
+            //urlConnection.setDoOutput(true);
+            urlConnection.setChunkedStreamingMode(0);
 
-                Log.d("HTTP","Connection config to sent are set");
+            //urlConnection.setRequestMethod("POST");
+            //OutputStream os = urlConnection.getOutputStream();
+            //OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+            //osw.write(msg);
+            //osw.flush();
+            //osw.close();
+            //os.close();  //don't forget to close the OutputStream
+            urlConnection.connect();
+            urlConnection.getResponseCode();
+            urlConnection.getResponseMessage();
 
-                //OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());
-                //writeStream(out);
+            urlConnection.disconnect();
 
-                urlConnection.setDoOutput(true);
-                //urlConnection.setRequestMethod("POST");
-                //OutputStream os = urlConnection.getOutputStream();
-                //OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
-                //osw.write(msg);
-                //osw.flush();
-                //osw.close();
-                //os.close();  //don't forget to close the OutputStream
-                urlConnection.connect();
-
-            } finally {
-                urlConnection.disconnect();
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
